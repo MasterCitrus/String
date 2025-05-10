@@ -169,7 +169,6 @@ String& String::operator=(String&& string) noexcept
 		string.isSSO = true;
 		string.heap.ptr = nullptr;
 		string.heap.size = 0;
-		string.heap.capacity = SSO_CAPACITY;
 		std::memset(string.stack.buffer, 0, sizeof(string.stack.buffer));
 	}
 
@@ -222,20 +221,21 @@ String& String::Append(const char* string)
 {
 	size_t length = std::strlen(string);
 
+	// Check if stack allocated
 	if (isSSO)
 	{
-		if (length < SSO_CAPACITY)
-		{
-			size_t newLength = stack.size + length;
+		size_t newLength = stack.size + length;
 
+		// Smaller than stack capacity
+		if (newLength < SSO_CAPACITY)
+		{
 			std::memcpy(stack.buffer + stack.size, string, length);
 			stack.buffer[newLength] = '\0';
 			stack.size = newLength;
 		}
+		// Length bigger than stack capacity
 		else
 		{
-			size_t newLength = stack.size + length;
-
 			char* newData = new char[newLength + 1];
 			std::memcpy(newData, stack.buffer, stack.size);
 			std::memcpy(newData + stack.size, string, length);
@@ -247,18 +247,31 @@ String& String::Append(const char* string)
 			heap.capacity = newLength;
 		}
 	}
+	// Heap based allocated
 	else
 	{
 		size_t newLength = heap.size + length;
 
-		char* newData = new char[newLength + 1];
-		std::memcpy(newData, heap.ptr, heap.size);
-		std::memcpy(newData + heap.size, string, length);
-		newData[newLength] = '\0';
+		// Allocate more memory if larger than heap capacity
+		if(newLength > heap.capacity)
+		{
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, heap.ptr, heap.size);
+			std::memcpy(newData + heap.size, string, length);
+			newData[newLength] = '\0';
 
-		heap.ptr = newData;
-		heap.size = newLength;
-		heap.capacity = newLength;
+			heap.ptr = newData;
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+		// No need to allocate
+		else
+		{
+			std::memcpy(heap.ptr + heap.size, string, length);
+			heap.ptr[newLength] = '\0';
+			heap.size = newLength;
+		}
 	}
 
 	return *this;
@@ -268,20 +281,24 @@ String& String::Append(const String& string)
 {
 	size_t length = string.Size();
 
+	// Check if incoming string is stack allocated
 	if (string.isSSO)
 	{
+		// Check if string is stack allocated
 		if (isSSO)
 		{
-			if (stack.size + length < SSO_CAPACITY)
+			size_t newLength = stack.size + length;
+
+			// Length smaller than stack capacity
+			if (newLength < SSO_CAPACITY)
 			{
 				std::memcpy(stack.buffer + stack.size, string.stack.buffer, length);
 				stack.buffer[length] = '\0';
 				stack.size += length;
 			}
+			// Length larger than stack capacity
 			else
 			{
-				size_t newLength = stack.size + length;
-
 				char* newData = new char[newLength + 1];
 				std::memcpy(newData, stack.buffer, stack.size);
 				std::memcpy(newData + stack.size, string.stack.buffer, length);
@@ -293,23 +310,36 @@ String& String::Append(const String& string)
 				heap.capacity = newLength;
 			}
 		}
+		// String is using heap allocated
 		else
 		{
-			size_t newLength = stack.size + length;
+			size_t newLength = heap.size + length;
 
-			char* newData = new char[newLength + 1];
-			std::memcpy(newData, stack.buffer, stack.size);
-			std::memcpy(newData + stack.size, string.stack.buffer, length);
-			newData[newLength] = '\0';
+			// Allocate more memory if new length is bigger than capacity
+			if (newLength > heap.capacity)
+			{
+				char* newData = new char[newLength + 1];
+				std::memcpy(newData, stack.buffer, stack.size);
+				std::memcpy(newData + stack.size, string.stack.buffer, length);
+				newData[newLength] = '\0';
 
-			isSSO = false;
-			heap.ptr = newData;
-			heap.size = newLength;
-			heap.capacity = newLength;
+				heap.ptr = newData;
+				heap.size = newLength;
+				heap.capacity = newLength;
+			}
+			// No allocation
+			else
+			{
+				std::memcpy(heap.ptr + heap.size, string.stack.buffer, length);
+				heap.ptr[newLength] = '\0';
+				heap.size = newLength;
+			}
 		}
 	}
+	// Incoming string is heap allocated
 	else
 	{
+		// String is stack allocated
 		if (isSSO)
 		{
 			size_t newLength = stack.size + length;
@@ -324,18 +354,30 @@ String& String::Append(const String& string)
 			heap.size = newLength;
 			heap.capacity = newLength;
 		}
+		// String is heap allocated
 		else
 		{
 			size_t newLength = heap.size + length;
 
-			char* newData = new char[newLength + 1];
-			std::memcpy(newData, heap.ptr, heap.size);
-			std::memcpy(newData + heap.size, string.heap.ptr, length);
-			newData[newLength] = '\0';
+			// Allocate more memory is new length is bigger than capacity
+			if (newLength > heap.capacity)
+			{
+				char* newData = new char[newLength + 1];
+				std::memcpy(newData, heap.ptr, heap.size);
+				std::memcpy(newData + heap.size, string.heap.ptr, length);
+				newData[newLength] = '\0';
 
-			heap.ptr = newData;
-			heap.size = newLength;
-			heap.capacity = newLength;
+				heap.ptr = newData;
+				heap.size = newLength;
+				heap.capacity = newLength;
+			}
+			// No allocation
+			else
+			{
+				std::memcpy(heap.ptr + heap.size, string.stack.buffer, stack.size);
+				heap.ptr[newLength] = '\0';
+				heap.size = newLength;
+			}
 		}
 	}
 
@@ -344,13 +386,188 @@ String& String::Append(const String& string)
 
 String& String::Insert(size_t index, const char* string)
 {
-	// TODO: Implement function
+	if (index > Size())
+	{
+		throw std::out_of_range("Insert index is out of range.");
+	}
+
+	size_t length = std::strlen(string);
+
+	// String is stack allocated
+	if (isSSO)
+	{
+		size_t newLength = stack.size + length;
+
+		// Length smaller than stack capacity
+		if (newLength < SSO_CAPACITY)
+		{
+			std::memmove(stack.buffer + index + length, stack.buffer + index, stack.size - index + 1);
+			std::memcpy(stack.buffer + index, string, length);
+			stack.buffer[newLength] = '\0';
+			stack.size = newLength;
+		}
+		// Length bigger than stack capacity
+		else
+		{
+			isSSO = false;
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, stack.buffer, stack.size);
+			std::memmove(newData + index + length, newData + index, stack.size - index + 1);
+			std::memcpy(newData + index, string, length);
+			newData[newLength] = '\0';
+
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+	}
+	// String is heap allocated
+	else
+	{
+		size_t newLength = heap.size + length;
+
+		// Allocate more memory
+		if (newLength > heap.capacity)
+		{
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, stack.buffer, stack.size);
+			std::memmove(newData + index + length, newData + index, stack.size - index + 1);
+			std::memcpy(newData + index, string, length);
+			newData[newLength] = '\0';
+
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+		// No Allocation
+		else
+		{
+			std::memmove(heap.ptr + index + length, heap.ptr + index, heap.size - index + 1);
+			std::memcpy(heap.ptr + index, string, length);
+			heap.ptr[newLength] = '\0';
+			heap.size = newLength;
+		}
+	}
+
 	return *this;
 }
 
 String& String::Insert(size_t index, const String& string)
 {
-	// TODO: Implement function
+	if (index > Size())
+	{
+		throw std::out_of_range("Insert index is out of range.");
+	}
+
+	size_t length = string.Size();
+
+	// Incoming string is stack allocated
+	if (string.isSSO)
+	{
+		// String is stack allocated
+		if(isSSO)
+		{
+			size_t newLength = stack.size + length;
+
+			// Length smaller than stack capacity
+			if (newLength < SSO_CAPACITY)
+			{
+				std::memmove(stack.buffer + index + length, stack.buffer + index, stack.size - index + 1);
+				std::memcpy(stack.buffer + index, string.stack.buffer, length);
+				stack.buffer[newLength] = '\0';
+				stack.size = newLength;
+			}
+			// Length bigger than stack capacity
+			else
+			{
+				isSSO = false;
+				char* newData = new char[newLength + 1];
+				std::memcpy(newData, stack.buffer, stack.size);
+				std::memmove(newData + index + length, newData + index, stack.size - index + 1);
+				std::memcpy(newData + index, string.stack.buffer, length);
+				newData[newLength] = '\0';
+
+				heap.ptr = newData;
+				heap.size = newLength;
+				heap.capacity = newLength;
+			}
+		}
+		// String is heap allocated
+		else
+		{
+			size_t newLength = heap.size + length;
+
+			// Allocate more memory
+			if (newLength > heap.capacity)
+			{
+				char* newData = new char[newLength + 1];
+				std::memcpy(newData, heap.ptr, heap.size);
+				std::memmove(newData + index + length, newData + index, heap.size - index + 1);
+				std::memcpy(newData + index, string.stack.buffer, length);
+				newData[newLength] = '\0';
+
+				heap.ptr = newData;
+				heap.size = newLength;
+				heap.capacity = newLength;
+			}
+			// No allocation
+			else
+			{
+				std::memmove(heap.ptr + index + length, heap.ptr + index, heap.size - index + 1);
+				std::memcpy(heap.ptr + index, string.stack.buffer, length);
+				heap.ptr[newLength] = '\0';
+				heap.size = newLength;
+			}
+		}
+	}
+	// Incoming String is heap allocated
+	else
+	{
+		// String is stack allocated
+		if(isSSO)
+		{
+			size_t newLength = stack.size + length;
+
+			isSSO = false;
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, stack.buffer, stack.size);
+			std::memmove(newData + index + length, newData + index, stack.size - index + 1);
+			std::memcpy(newData + index, string.heap.ptr, length);
+			newData[newLength] = '\0';
+
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+		// String is heap allocated
+		else
+		{
+			size_t newLength = heap.size + length;
+
+			// Allocate more memory
+			if (newLength > heap.capacity)
+			{
+				char* newData = new char[newLength + 1];
+				std::memcpy(newData, heap.ptr, heap.size);
+				std::memmove(newData + index + length, newData + index, heap.size - index + 1);
+				std::memcpy(newData + index, string.heap.ptr, length);
+				newData[newLength] = '\0';
+
+				heap.ptr = newData;
+				heap.size = newLength;
+				heap.capacity = newLength;
+			}
+			// No Allocation
+			else
+			{
+				std::memmove(heap.ptr + index + length, heap.ptr + index, heap.size - index + 1);
+				std::memcpy(heap.ptr + index, string.heap.ptr, length);
+				heap.ptr[newLength] = '\0';
+				heap.size = newLength;
+			}
+		}
+	}
+
 	return *this;
 }
 
@@ -382,5 +599,5 @@ const char* String::CStr() const
 
 void String::Debug() const
 {
-	std::cout << "Contents: " << CStr() << '\n' << "Size: " << Size() << '\n' << "Capacity: " << Capacity() << '\n' << "Storage: " << (isSSO ? "Stack" : "Heap" ) << "\n\n";
+	std::cout << "Contents: " << CStr() << '\n' << "Size: " << Size() << '\n' << "Capacity: " << Capacity() << '\n' << "allocated: " << (isSSO ? "Stack" : "Heap" ) << "\n\n";
 }
