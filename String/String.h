@@ -7,6 +7,12 @@ class String
 public:
 	String();
 	String(const char* string);
+	String(const String& string);
+	String(String&& string) noexcept;
+	~String();
+
+	String& operator=(const String& string);
+	String& operator=(String&& string) noexcept;
 
 	size_t Capacity() const;
 
