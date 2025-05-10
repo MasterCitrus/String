@@ -178,6 +178,193 @@ String& String::operator=(String&& string) noexcept
 	return *this;
 }
 
+String& String::operator+=(const char* string)
+{
+	Append(string);
+	return *this;
+}
+
+String& String::operator+=(const String& string)
+{
+	Append(string);
+	return *this;
+}
+
+String String::operator+(const char* string)
+{
+	String result(*this);
+	result += string;
+	return result;
+}
+
+String String::operator+(const String& string)
+{
+	String result(*this);
+	result += string;
+	return result;
+}
+
+void String::Clear()
+{
+	if (isSSO)
+	{
+		std::memset(stack.buffer, 0, sizeof(stack.buffer));
+		stack.size = 0;
+	}
+	else
+	{
+		std::memset(heap.ptr, 0, heap.capacity);
+		heap.size = 0;
+	}
+}
+
+String& String::Append(const char* string)
+{
+	size_t length = std::strlen(string);
+
+	if (isSSO)
+	{
+		if (length < SSO_CAPACITY)
+		{
+			size_t newLength = stack.size + length;
+
+			std::memcpy(stack.buffer + stack.size, string, length);
+			stack.buffer[newLength] = '\0';
+			stack.size = newLength;
+		}
+		else
+		{
+			size_t newLength = stack.size + length;
+
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, stack.buffer, stack.size);
+			std::memcpy(newData + stack.size, string, length);
+			newData[newLength] = '\0';
+
+			isSSO = false;
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+	}
+	else
+	{
+		size_t newLength = heap.size + length;
+
+		char* newData = new char[newLength + 1];
+		std::memcpy(newData, heap.ptr, heap.size);
+		std::memcpy(newData + heap.size, string, length);
+		newData[newLength] = '\0';
+
+		heap.ptr = newData;
+		heap.size = newLength;
+		heap.capacity = newLength;
+	}
+
+	return *this;
+}
+
+String& String::Append(const String& string)
+{
+	size_t length = string.Size();
+
+	if (string.isSSO)
+	{
+		if (isSSO)
+		{
+			if (stack.size + length < SSO_CAPACITY)
+			{
+				std::memcpy(stack.buffer + stack.size, string.stack.buffer, length);
+				stack.buffer[length] = '\0';
+				stack.size += length;
+			}
+			else
+			{
+				size_t newLength = stack.size + length;
+
+				char* newData = new char[newLength + 1];
+				std::memcpy(newData, stack.buffer, stack.size);
+				std::memcpy(newData + stack.size, string.stack.buffer, length);
+				newData[newLength] = '\0';
+
+				isSSO = false;
+				heap.ptr = newData;
+				heap.size = newLength;
+				heap.capacity = newLength;
+			}
+		}
+		else
+		{
+			size_t newLength = stack.size + length;
+
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, stack.buffer, stack.size);
+			std::memcpy(newData + stack.size, string.stack.buffer, length);
+			newData[newLength] = '\0';
+
+			isSSO = false;
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+	}
+	else
+	{
+		if (isSSO)
+		{
+			size_t newLength = stack.size + length;
+
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, stack.buffer, stack.size);
+			std::memcpy(newData + stack.size, string.heap.ptr, length);
+			newData[newLength] = '\0';
+
+			isSSO = false;
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+		else
+		{
+			size_t newLength = heap.size + length;
+
+			char* newData = new char[newLength + 1];
+			std::memcpy(newData, heap.ptr, heap.size);
+			std::memcpy(newData + heap.size, string.heap.ptr, length);
+			newData[newLength] = '\0';
+
+			heap.ptr = newData;
+			heap.size = newLength;
+			heap.capacity = newLength;
+		}
+	}
+
+	return *this;
+}
+
+String& String::Insert(size_t index, const char* string)
+{
+	// TODO: Implement function
+	return *this;
+}
+
+String& String::Insert(size_t index, const String& string)
+{
+	// TODO: Implement function
+	return *this;
+}
+
+String& String::Erase(size_t index, size_t count)
+{
+	// TODO: Implement function
+	return *this;
+}
+
+bool String::Empty() const
+{
+	return isSSO ? stack.size == 0 : heap.size == 0;
+}
+
 size_t String::Capacity() const
 {
 	return isSSO ? SSO_CAPACITY : heap.capacity;
