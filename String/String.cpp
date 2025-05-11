@@ -651,13 +651,13 @@ String& String::Erase(size_t index, size_t count)
 
 size_t String::Find( const String& string, size_t pos ) const
 {
-	if (string.Size() == 0) return npos;
+	if (string.Size() == 0) return pos <= string.Size() ? pos : npos;
 
-	if (string.Size() > this->Size()) return npos;
+	if (string.Size() + pos > this->Size()) return npos;
 
-	for (size_t i = 0; i < this->Size() - string.Size(); ++i)
+	for (size_t i = pos; i <= this->Size() - string.Size(); ++i)
 	{
-		if (std::memcmp( this->CStr() + pos + i, string.CStr(), string.Size() ) == 0)
+		if (std::memcmp( this->CStr() + i, string.CStr(), string.Size() ) == 0)
 		{
 			return i;
 		}
@@ -670,13 +670,51 @@ size_t String::Find( const char* string, size_t pos ) const
 {
 	size_t length = std::strlen( string );
 
-	if (length == 0) return npos;
+	if (length == 0) return pos <= length ? pos : npos;
+
+	if (length + pos > this->Size()) return npos;
+
+	for (size_t i = pos; i <= this->Size() - length; ++i)
+	{
+		if (std::memcmp( this->CStr() + i, string, length ) == 0)
+		{
+			return i;
+		}
+	}
+
+	return npos;
+}
+
+size_t String::RFind( const String& string, size_t pos ) const
+{
+	if (string.Size() == 0) return pos < string.Size() ? pos : npos;
+
+	if (string.Size() > this->Size()) return npos;
+
+	size_t start = std::min( pos, this->Size() - string.Size() );
+	for (size_t i = start + 1; i-- > 0;)
+	{
+		if (std::memcmp( this->CStr() + i, string.CStr(), string.Size() ) == 0)
+		{
+			return i;
+		}
+	}
+
+	return npos;
+}
+
+size_t String::RFind( const char* string, size_t pos ) const
+{
+	size_t length = std::strlen( string );
+
+	if (length == 0) return pos < length ? pos : npos;
 
 	if (length > this->Size()) return npos;
 
-	for (size_t i = 0; i < this->Size() - length; ++i)
+	size_t start = std::min( pos, this->Size() - length );
+	for (size_t i = start + 1; i-- > 0;)
 	{
-		if (std::memcmp( this->CStr() + pos + i, string, length ) == 0)
+		if (std::memcmp( this->CStr() + i, string, length ) == 0)
 		{
 			return i;
 		}

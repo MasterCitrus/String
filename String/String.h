@@ -45,6 +45,9 @@ public:
 	size_t Find( const String& string, size_t pos = 0 ) const;
 	size_t Find( const char* string, size_t pos = 0 ) const;
 
+	size_t RFind( const String& string, size_t pos = npos ) const;
+	size_t RFind( const char* string, size_t pos = npos ) const;
+
 	//Capacity
 	bool Empty() const;
 

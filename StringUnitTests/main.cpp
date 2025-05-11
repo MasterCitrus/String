@@ -166,6 +166,10 @@ int main()
 
         size_t found2 = haystack2.Find( needle1 );
 
+        size_t found3 = haystack1.RFind( "FIND" );
+
+        size_t found4 = haystack2.RFind( needle1 );
+
         if (found1 != String::npos)
         {
             std::cout << "FIND found at index " << found1 << '\n';
@@ -182,6 +186,24 @@ int main()
         else
         {
             std::cout << needle1.CStr() << " not found. NPOS = " << found2 << '\n';
+        }
+
+        if (found3 != String::npos)
+        {
+            std::cout << "FIND found at index " << found3 << '\n';
+        }
+        else
+        {
+            std::cout << "FIND not found. NPOS = " << found3 << '\n';
+        }
+
+        if (found4 != String::npos)
+        {
+            std::cout << needle1.CStr() << " found at index " << found4 << '\n';
+        }
+        else
+        {
+            std::cout << needle1.CStr() << " not found. NPOS = " << found4 << '\n';
         }
 
     }
