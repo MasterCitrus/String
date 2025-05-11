@@ -9,7 +9,6 @@ String::String()
 {
 	std::memset(stack.buffer, 0, sizeof(stack.buffer));
 	stack.size = 0;
-	Debug();
 }
 
 //Construct from CString
@@ -29,14 +28,12 @@ String::String(const char* string)
 	else
 	{
 		isSSO = false;
-		heap.ptr = new char[SSO_CAPACITY * 2 + 1];
+		heap.ptr = new char[length + 1];
 		std::memcpy(heap.ptr, string, length);
 		heap.ptr[length] = '\0';
 		heap.size = length;
-		heap.capacity = SSO_CAPACITY * 2;
+		heap.capacity = length;
 	}
-
-	Debug();
 }
 
 //Copy constructor
@@ -60,8 +57,6 @@ String::String(const String& string)
 		heap.size = length;
 		heap.capacity = length;
 	}
-
-	Debug();
 }
 
 //Move constructor
@@ -93,8 +88,6 @@ String::String(String&& string) noexcept
 		string.heap.capacity = SSO_CAPACITY;
 		std::memset(string.stack.buffer, 0, sizeof(string.stack.buffer));
 	}
-
-	Debug();
 }
 
 String::~String()
@@ -105,35 +98,99 @@ String::~String()
 	}
 }
 
+String& String::operator=( const char* string )
+{
+	size_t length = std::strlen( string );
+
+	if(isSSO)
+	{
+		if (length < SSO_CAPACITY)
+		{
+			isSSO = true;
+			std::memcpy( stack.buffer, string, length );
+			stack.buffer[length] = '\0';
+			stack.size = length;
+		}
+		else
+		{
+			isSSO = false;
+			heap.ptr = new char[length + 1];
+			std::memcpy( heap.ptr, string, length );
+			heap.ptr[length] = '\0';
+			heap.size = length;
+			heap.capacity = length;
+		}
+	}
+	else
+	{
+		if (length < SSO_CAPACITY)
+		{
+			isSSO = true;
+			std::memcpy( stack.buffer, string, length );
+			stack.buffer[length] = '\0';
+			stack.size = length;
+		}
+		else
+		{
+			isSSO = false;
+			heap.ptr = new char[length + 1];
+			std::memcpy( heap.ptr, string, length );
+			heap.ptr[length] = '\0';
+			heap.size = length;
+			heap.capacity = length;
+		}
+	}
+
+	return *this;
+}
+
 String& String::operator=(const String& string)
 {
 	if (this == &string) return *this;
-
-	if (!isSSO)
-	{
-		delete[] heap.ptr;
-	}
 
 	size_t length = string.Size();
 
 	if (string.isSSO)
 	{
-		isSSO = true;
-		std::memcpy(stack.buffer, string.stack.buffer, length);
-		stack.buffer[length] = '\0';
-		stack.size = length;
+		if (isSSO)
+		{
+			std::memcpy(stack.buffer, string.stack.buffer, length);
+			stack.buffer[length] = '\0';
+			stack.size = length;
+		}
+		else
+		{
+			delete[] heap.ptr;
+
+			isSSO = true;
+			std::memcpy( stack.buffer, string.stack.buffer, length );
+			stack.buffer[length] = '\0';
+			stack.size = length;
+		}
 	}
 	else
 	{
-		isSSO = false;
-		heap.ptr = new char[length + 1];
-		std::memcpy(heap.ptr, string.heap.ptr, length);
-		heap.ptr[length] = '\0';
-		heap.size = length;
-		heap.capacity = length;
-	}
+		if (isSSO)
+		{
+			isSSO = false;
+			heap.ptr = new char[length + 1];
+			std::memcpy( heap.ptr, string.heap.ptr, length );
+			heap.ptr[length] = '\0';
+			heap.size = length;
+			heap.capacity = length;
+		}
+		else
+		{
+			delete[] heap.ptr;
 
-	Debug();
+			isSSO = false;
+			heap.ptr = new char[length + 1];
+			std::memcpy(heap.ptr, string.heap.ptr, length);
+			heap.ptr[length] = '\0';
+			heap.size = length;
+			heap.capacity = length;
+		}
+	}
 
 	return *this;
 }
@@ -172,8 +229,6 @@ String& String::operator=(String&& string) noexcept
 		std::memset(string.stack.buffer, 0, sizeof(string.stack.buffer));
 	}
 
-	Debug();
-
 	return *this;
 }
 
@@ -191,14 +246,14 @@ String& String::operator+=(const String& string)
 
 String String::operator+(const char* string)
 {
-	String result(*this);
+	String result = *this;
 	result += string;
 	return result;
 }
 
 String String::operator+(const String& string)
 {
-	String result(*this);
+	String result = *this;
 	result += string;
 	return result;
 }
@@ -261,7 +316,6 @@ String& String::Append(const char* string)
 			newData[newLength] = '\0';
 
 			heap.ptr = newData;
-			heap.ptr = newData;
 			heap.size = newLength;
 			heap.capacity = newLength;
 		}
@@ -293,8 +347,8 @@ String& String::Append(const String& string)
 			if (newLength < SSO_CAPACITY)
 			{
 				std::memcpy(stack.buffer + stack.size, string.stack.buffer, length);
-				stack.buffer[length] = '\0';
-				stack.size += length;
+				stack.buffer[newLength] = '\0';
+				stack.size = newLength;
 			}
 			// Length larger than stack capacity
 			else
@@ -374,7 +428,7 @@ String& String::Append(const String& string)
 			// No allocation
 			else
 			{
-				std::memcpy(heap.ptr + heap.size, string.stack.buffer, stack.size);
+				std::memcpy(heap.ptr + heap.size, string.heap.ptr, length);
 				heap.ptr[newLength] = '\0';
 				heap.size = newLength;
 			}
@@ -573,8 +627,62 @@ String& String::Insert(size_t index, const String& string)
 
 String& String::Erase(size_t index, size_t count)
 {
-	// TODO: Implement function
+	if (count == -1) count = stack.size;
+
+	if (isSSO)
+	{
+		size_t newLength = stack.size - count;
+
+		std::memmove( stack.buffer + index, stack.buffer + index + count, stack.size - count );
+		stack.buffer[newLength] = '\0';
+		stack.size = newLength;
+	}
+	else
+	{
+		size_t newLength = heap.size - count;
+
+		std::memmove( heap.ptr + index, heap.ptr + index + count, heap.size - count );
+		heap.ptr[newLength] = '\0';
+		heap.size = newLength;
+	}
+	
 	return *this;
+}
+
+size_t String::Find( const String& string, size_t pos ) const
+{
+	if (string.Size() == 0) return npos;
+
+	if (string.Size() > this->Size()) return npos;
+
+	for (size_t i = 0; i < this->Size() - string.Size(); ++i)
+	{
+		if (std::memcmp( this->CStr() + pos + i, string.CStr(), string.Size() ) == 0)
+		{
+			return i;
+		}
+	}
+
+	return npos;
+}
+
+size_t String::Find( const char* string, size_t pos ) const
+{
+	size_t length = std::strlen( string );
+
+	if (length == 0) return npos;
+
+	if (length > this->Size()) return npos;
+
+	for (size_t i = 0; i < this->Size() - length; ++i)
+	{
+		if (std::memcmp( this->CStr() + pos + i, string, length ) == 0)
+		{
+			return i;
+		}
+	}
+
+	return npos;
 }
 
 bool String::Empty() const
@@ -587,9 +695,45 @@ size_t String::Capacity() const
 	return isSSO ? SSO_CAPACITY : heap.capacity;
 }
 
+size_t String::Length() const
+{
+	return Size();
+}
+
 size_t String::Size() const
 {
 	return isSSO ? stack.size : heap.size;
+}
+
+void String::Reserve(size_t newCap)
+{
+	if (isSSO)
+	{
+		if (newCap > SSO_CAPACITY)
+		{
+			size_t length = stack.size;
+
+			isSSO = false;
+			char* newData = new char[newCap + 1];
+			std::memcpy( newData, stack.buffer, length );
+			newData[length] = '\0';
+			heap.ptr = newData;
+			heap.size = length;
+			heap.capacity = newCap;
+		}
+	}
+	else
+	{
+		if (newCap > heap.capacity)
+		{
+			char* newData = new char[newCap + 1];
+			std::memcpy( newData, heap.ptr, heap.size );
+			newData[heap.size] = '\0';
+			delete[] heap.ptr;
+			heap.ptr = newData;
+			heap.capacity = newCap;
+		}
+	}
 }
 
 const char* String::CStr() const
@@ -600,4 +744,25 @@ const char* String::CStr() const
 void String::Debug() const
 {
 	std::cout << "Contents: " << CStr() << '\n' << "Size: " << Size() << '\n' << "Capacity: " << Capacity() << '\n' << "allocated: " << (isSSO ? "Stack" : "Heap" ) << "\n\n";
+}
+
+String operator+( const String& lhs, const char* rhs )
+{
+	String result = lhs;
+	result += rhs;
+	return result;
+}
+
+String operator+( const char* lhs, const String& rhs )
+{
+	String result = lhs;
+	result += rhs;
+	return result;
+}
+
+String operator+( const String& lhs, const String& rhs )
+{
+	String result = lhs;
+	result += rhs;
+	return result;
 }

@@ -75,6 +75,7 @@ int main()
         String string6 = " to my new empire";
 
         String result1 = string1 + string2;
+        PrintStringInfo( result1 );
 
         String result2 = string3 + string4;
 
@@ -124,6 +125,68 @@ int main()
     }
 
     // INSERT TEST END ////////////////////////////////////////////////////
+
+
+    // ERASE TEST START ///////////////////////////////////////////////////
+
+    {
+        String erase1 = "Keep. Erase.";
+        PrintStringInfo( erase1 );
+
+        String erase2 = "Keep me. Erase me.";
+        PrintStringInfo( erase2 );
+
+        String erase3 = "Keep me. ERASE ME. Keep me.";
+
+        erase1.Erase( 5, 7 );
+        PrintStringInfo( erase1 );
+
+        erase2.Erase( 8, 10 );
+        PrintStringInfo( erase2 );
+
+        erase3.Erase( 8, 10 );
+        PrintStringInfo( erase3 );
+    }
+
+    // ERASE TEST END /////////////////////////////////////////////////////
+
+
+    // FIND TEST START ////////////////////////////////////////////////////
+
+    {
+        String haystack1 = "WooFINDooo";
+        PrintStringInfo( haystack1 );
+
+        String haystack2 = "Can you FIND ME in here?";
+        PrintStringInfo( haystack2 );
+
+        String needle1 = "FIND ME";
+
+        size_t found1 = haystack1.Find( "FIND" );
+
+        size_t found2 = haystack2.Find( needle1 );
+
+        if (found1 != String::npos)
+        {
+            std::cout << "FIND found at index " << found1 << '\n';
+        }
+        else
+        {
+            std::cout << "FIND not found. NPOS = " << found1 << '\n';
+        }
+
+        if (found2 != String::npos)
+        {
+            std::cout << needle1.CStr() << " found at index " << found2 << '\n';
+        }
+        else
+        {
+            std::cout << needle1.CStr() << " not found. NPOS = " << found2 << '\n';
+        }
+
+    }
+
+    // FIND TEST END //////////////////////////////////////////////////////
 }
 
 void PrintStringInfo(const String& string)
