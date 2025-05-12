@@ -9,38 +9,42 @@ int main()
     //CONSTRUCTOR TESTS START /////////////////////////////////////////////
 
     {
-        std::cout << "Default constructed\n";
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  CONSTRUCTOR TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String string1;
-
-        std::cout << "Const char constructor\n";
+        PrintStringInfo(string1);
+        
         String stack = "Stack string.";
-
-        std::cout << "Const char constructor\n";
+        PrintStringInfo(stack);
+        
         String heap = "This is a heap string.";
-
-        std::cout << "Copy constructor\n";
+        PrintStringInfo(heap);
+        
         String copy1c(stack);
+        PrintStringInfo(copy1c);
 
-        std::cout << "Copy constructor\n";
         String copy2c(heap);
+        PrintStringInfo(copy2c);
 
-        std::cout << "Copy assignment\n";
         String copy1a = stack;
+        PrintStringInfo(copy1a);
 
-        std::cout << "Copy assignment\n";
         String copy2a = heap;
+        PrintStringInfo(copy2a);
 
-        std::cout << "Move constructor\n";
         String move1c(std::move(copy1c));
+        PrintStringInfo(move1c);
 
-        std::cout << "Move constructor\n";
         String move2c(std::move(copy2c));
+        PrintStringInfo(move2c);
 
-        std::cout << "Move assignment\n";
         String move1a = std::move(move1c);
+        PrintStringInfo(move1a);
 
-        std::cout << "Move assignment\n";
         String move2a = std::move(move2c);
+        PrintStringInfo(move2a);
     }
 
     //CONSTRUCTOR TESTS END ///////////////////////////////////////////////
@@ -49,6 +53,10 @@ int main()
     // APPEND TEST START //////////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  APPEND TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String append1 = "Add";
         String append2 = "Add more";
         String append3 = "Add more to me. I need more";
@@ -90,6 +98,10 @@ int main()
     // CLEAR TEST START ///////////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  CLEAR TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String clearMe1 = "Clear me.";
         String clearMe2 = "I need to be cleared.";
 
@@ -107,6 +119,10 @@ int main()
     // INSERT TEST START //////////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  INSERT TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String string1 = "SE";
         String string2 = "Start End";
         String string3 = "I start here. I end here.";
@@ -131,6 +147,10 @@ int main()
     // ERASE TEST START ///////////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  ERASE TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String erase1 = "Keep. Erase.";
         PrintStringInfo( erase1 );
 
@@ -155,6 +175,10 @@ int main()
     // FIND TEST START ////////////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  FIND TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String haystack1 = "WooFINDooo";
         PrintStringInfo( haystack1 );
 
@@ -216,6 +240,10 @@ int main()
     // REPLACE TEST START /////////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  REPLACE TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         String replace1 = "Hi, {name}";
         PrintStringInfo(replace1);
 
@@ -248,6 +276,10 @@ int main()
     // COMPARISON TEST START //////////////////////////////////////////////
 
     {
+        std::cout << "\n//////////////////////";
+        std::cout << "\n  COMPARSION TESTS";
+        std::cout << "\n//////////////////////\n\n";
+
         std::vector<String> strings;
 
         String string1 = "String";

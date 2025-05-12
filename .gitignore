@@ -1,6 +1,5 @@
 ## VS Files
 /.vs
-x64/
 *.sln
 *.vcxproj
 *.filters
@@ -10,3 +9,14 @@ x64/
 CMakeFiles/
 *.cmake
 CMakeCache.txt
+
+## Build Files
+x64/
+String.dir/
+StringUnitTests.dir/
+*/Debug/*.lib
+*/Debug/*.pdb
+*/Debug/*.exe
+*/Release/*.lib
+*/Release/*.pdb
+*/Release/*.exe
