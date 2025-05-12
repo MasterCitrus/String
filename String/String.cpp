@@ -961,6 +961,81 @@ void String::Reserve(size_t newCap)
 	}
 }
 
+void String::Shrink()
+{
+	if (isSSO) return;
+
+	size_t size = heap.size;
+
+	if (!isSSO && size < SSO_CAPACITY)
+	{
+		char* temp = new char[size + 1];
+		std::memcpy( temp, heap.ptr, size );
+		temp[size] = '\0';
+		delete[] heap.ptr;
+
+
+		isSSO = true;
+		std::memcpy( stack.buffer, temp, size );
+		stack.buffer[size] = '\0';
+		delete[] temp;
+	}
+	else
+	{
+		char* temp = new char[size + 1];
+		std::memcpy( temp, heap.ptr, size );
+		temp[size] = '\0';
+		delete[] heap.ptr;
+
+		heap.ptr = temp;
+		heap.capacity = size;
+	}
+}
+
+int String::Compare( const char* string ) const
+{
+	size_t lhs = Size();
+	size_t rhs = std::strlen( string );
+
+	int result = std::memcmp( Data(), string, std::min( lhs, rhs ) );
+
+	if (result != 0)
+	{
+		return result;
+	}
+	if (lhs < rhs)
+	{
+		return -1;
+	}
+	if (lhs > rhs)
+	{
+		return 1;
+	}
+	return 0;
+}
+
+int String::Compare( const String& string ) const
+{
+	size_t lhs = Size();
+	size_t rhs = string.Size();
+
+	int result = std::memcmp( Data(), string.Data(), std::min( lhs, rhs ) );
+
+	if (result != 0)
+	{
+		return result;
+	}
+	if (lhs < rhs)
+	{
+		return -1;
+	}
+	if (lhs > rhs)
+	{
+		return 1;
+	}
+	return 0;
+}
+
 const char* String::CStr() const
 {
 	return isSSO ? stack.buffer : heap.ptr;
@@ -1076,6 +1151,96 @@ String operator+( const String& lhs, const String& rhs )
 	String result = lhs;
 	result += rhs;
 	return result;
+}
+
+bool operator==( const String& lhs, const char* rhs )
+{
+	return lhs.Compare(rhs) == 0;
+}
+
+bool operator==( const char* lhs, const String& rhs )
+{
+	return rhs.Compare( lhs ) == 0;
+}
+
+bool operator==( const String& lhs, const String& rhs )
+{
+	return lhs.Compare( rhs ) == 0;
+}
+
+bool operator!=( const String& lhs, const char* rhs )
+{
+	return lhs.Compare( rhs ) != 0;
+}
+
+bool operator!=( const char* lhs, const String& rhs )
+{
+	return rhs.Compare( lhs ) != 0;
+}
+
+bool operator!=( const String& lhs, const String& rhs )
+{
+	return lhs.Compare( rhs ) != 0;
+}
+
+bool operator<( const String& lhs, const char* rhs )
+{
+	return lhs.Compare( rhs ) < 0;
+}
+
+bool operator<( const char* lhs, const String& rhs )
+{
+	return rhs.Compare( lhs ) < 0;
+}
+
+bool operator<( const String& lhs, const String& rhs )
+{
+	return lhs.Compare( rhs ) < 0;
+}
+
+bool operator>( const String& lhs, const char* rhs )
+{
+	return lhs.Compare( rhs ) > 0;
+}
+
+bool operator>( const char* lhs, const String& rhs )
+{
+	return rhs.Compare( lhs ) > 0;
+}
+
+bool operator>( const String& lhs, const String& rhs )
+{
+	return lhs.Compare( rhs ) > 0;
+}
+
+bool operator<=( const String& lhs, const char* rhs )
+{
+	return lhs.Compare( rhs ) <= 0;
+}
+
+bool operator<=( const char* lhs, const String& rhs )
+{
+	return rhs.Compare( lhs ) <= 0;
+}
+
+bool operator<=( const String& lhs, const String& rhs )
+{
+	return lhs.Compare( rhs ) <= 0;
+}
+
+bool operator>=( const String& lhs, const char* rhs )
+{
+	return lhs.Compare( rhs ) >= 0;
+}
+
+bool operator>=( const char* lhs, const String& rhs )
+{
+	return rhs.Compare( lhs ) >= 0;
+}
+
+bool operator>=( const String& lhs, const String& rhs )
+{
+	return lhs.Compare( rhs ) >= 0;
 }
 
 std::ostream& operator<<(std::ostream& os, const String& string)

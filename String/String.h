@@ -34,6 +34,30 @@ public:
 	friend String operator+( const char* lhs, const String& rhs );
 	friend String operator+( const String& lhs, const String& rhs );
 
+	friend bool operator==( const String& lhs, const char* rhs );
+	friend bool operator==( const char* lhs, const String& rhs );
+	friend bool operator==( const String& lhs, const String& rhs );
+
+	friend bool operator!=( const String& lhs, const char* rhs );
+	friend bool operator!=( const char* lhs, const String& rhs );
+	friend bool operator!=( const String& lhs, const String& rhs );
+
+	friend bool operator<( const String& lhs, const char* rhs );
+	friend bool operator<( const char* lhs, const String& rhs );
+	friend bool operator<( const String& lhs, const String& rhs );
+
+	friend bool operator>( const String& lhs, const char* rhs );
+	friend bool operator>( const char* lhs, const String& rhs );
+	friend bool operator>( const String& lhs, const String& rhs );
+
+	friend bool operator<=( const String& lhs, const char* rhs );
+	friend bool operator<=( const char* lhs, const String& rhs );
+	friend bool operator<=( const String& lhs, const String& rhs );
+
+	friend bool operator>=( const String& lhs, const char* rhs );
+	friend bool operator>=( const char* lhs, const String& rhs );
+	friend bool operator>=( const String& lhs, const String& rhs );
+
 	friend std::ostream& operator<<(std::ostream& os, const String& string);
 	friend std::istream& operator>>(std::istream& is, String& string);
 
@@ -80,6 +104,12 @@ public:
 	size_t MaxSize() const;
 
 	void Reserve(size_t newCap);
+
+	void Shrink();
+
+	// Operations
+	int Compare( const char* string ) const;
+	int Compare( const String& string ) const;
 
 	// Iterators
 	iterator begin() { return isSSO ? stack.buffer : heap.ptr; }

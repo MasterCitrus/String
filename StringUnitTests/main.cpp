@@ -1,5 +1,6 @@
-#include <iostream>
 #include <String/String.h>
+#include <iostream>
+#include <vector>
 
 void PrintStringInfo(const String& string);
 
@@ -244,6 +245,66 @@ int main()
 
     
 
+    // COMPARISON TEST START //////////////////////////////////////////////
+
+    {
+        std::vector<String> strings;
+
+        String string1 = "String";
+        String string2 = "String";
+        String string3 = "String2";
+        String string4 = "Strin";
+        String string5 = "Strink";
+
+        strings.push_back( string1 );
+        strings.push_back( string2 );
+        strings.push_back( string3 );
+        strings.push_back( string4 );
+        strings.push_back( string5 );
+
+        for (int i = 0; i < strings.size(); i++)
+        {
+
+            for (int j = 0; j < strings.size(); j++)
+            {
+                auto str1 = strings[i];
+                auto str2 = strings[j];
+
+                std::cout << "Outer loop: " << i << '\n' << "Inner loop " << j << "\n\n";
+
+                PrintStringInfo( str1 );
+
+                // Equal
+                str1 == str2 ? std::cout << "String 1 [ " << str1 << " ] is equal to String 2 [ " << str2 << " ]" << '\n'
+                    : std::cout << "String 1 [ " << str1 << " ] is not equal to String 2 [ " << str2 << " ]" << '\n';
+
+                // Not equal
+                str1 != str2 ? std::cout << "String 1 [ " << str1 << " ] is not equal to String 2 [ " << str2 << " ]" << '\n'
+                    : std::cout << "String 1 [ " << str1 << " ] is equal to String 2 [ " << str2 << " ]" << '\n';
+
+                // Less than
+                str1 < str2 ? std::cout << "String 1 [ " << str1 << " ] is less than String 2 [ " << str2 << " ]" << '\n'
+                    : std::cout << "String 1 [ " << str1 << " ] is not less than String 2 [ " << str2 << " ]" << '\n';
+
+                // Greater than
+                str1 > str2 ? std::cout << "String 1 [ " << str1 << " ] is greater than String 2 [ " << str2 << " ]" << '\n'
+                    : std::cout << "String 1 [ " << str1 << " ] is not greater than String 2 [ " << str2 << " ]" << '\n';
+
+                //Less or equal to
+                str1 <= str2 ? std::cout << "String 1 [ " << str1 << " ] is less than or equal to String 2 [ " << str2 << " ]" << '\n'
+                    : std::cout << "String 1 [ " << str1 << " ] is not less than or equal to String 2 [ " << str2 << " ]" << '\n';
+
+                //Greater or equal to
+                str1 >= str2 ? std::cout << "String 1 [ " << str1 << " ] is greater than or equal to String 2 [ " << str2 << " ]" << '\n'
+                    : std::cout << "String 1 [ " << str1 << " ] is not greater than or equal to String 2 [ " << str2 << " ]" << '\n';
+
+                std::cout << '\n';
+            }
+        }
+        
+    }
+
+    // COMPARISON TEST END ////////////////////////////////////////////////
 }
 
 void PrintStringInfo(const String& string)
