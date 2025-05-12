@@ -25,11 +25,23 @@ public:
 	String operator+(const char* string);
 	String operator+(const String& string);
 
+	// Non Member Operator Overloads
+
 	friend String operator+( const String& lhs, const char* rhs );
 	friend String operator+( const char* lhs, const String& rhs );
 	friend String operator+( const String& lhs, const String& rhs );
 
-	//Modifiers
+	friend std::ostream& operator<<(std::ostream& os, const String& string);
+	friend std::istream& operator>>(std::istream& is, String& string);
+
+	// Element Access
+	const char* CStr() const;
+
+	const char* Data() const;
+
+	char* Data();
+
+	// Modifiers
 
 	void Clear();
 
@@ -44,14 +56,14 @@ public:
 	String& Replace(size_t pos, size_t count, const char* string);
 	String& Replace(size_t pos, size_t count, const String& string);
 
-	//Search
+	// Search
 	size_t Find( const String& string, size_t pos = 0 ) const;
 	size_t Find( const char* string, size_t pos = 0 ) const;
 
 	size_t RFind( const String& string, size_t pos = npos ) const;
 	size_t RFind( const char* string, size_t pos = npos ) const;
 
-	//Capacity
+	// Capacity
 	bool Empty() const;
 
 	size_t Capacity() const;
@@ -59,11 +71,11 @@ public:
 	size_t Length() const;
 	size_t Size() const;
 
+	size_t MaxSize() const;
+
 	void Reserve(size_t newCap);
 
-	const char* CStr() const;
-
-	//Iterators
+	// Iterators
 	iterator begin() { return isSSO ? stack.buffer : heap.ptr; }
 	iterator end() { return begin() + Size(); }
 	const_iterator begin() const { return isSSO ? stack.buffer : heap.ptr; }

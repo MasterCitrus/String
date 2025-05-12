@@ -915,6 +915,11 @@ size_t String::Size() const
 	return isSSO ? stack.size : heap.size;
 }
 
+size_t String::MaxSize() const
+{
+	return std::distance(begin(), end());
+}
+
 void String::Reserve(size_t newCap)
 {
 	if (isSSO)
@@ -947,6 +952,16 @@ void String::Reserve(size_t newCap)
 }
 
 const char* String::CStr() const
+{
+	return isSSO ? stack.buffer : heap.ptr;
+}
+
+const char* String::Data() const
+{
+	return isSSO ? stack.buffer : heap.ptr;
+}
+
+char* String::Data()
 {
 	return isSSO ? stack.buffer : heap.ptr;
 }
@@ -1031,4 +1046,26 @@ String operator+( const String& lhs, const String& rhs )
 	String result = lhs;
 	result += rhs;
 	return result;
+}
+
+std::ostream& operator<<(std::ostream& os, const String& string)
+{
+	os << string.CStr();
+	return os;
+}
+
+std::istream& operator>>(std::istream& is, String& string)
+{
+	std::istream::sentry sentry(is);
+
+	if( !sentry ) return is;
+
+	char buffer[1024];
+	is.get(buffer, sizeof(buffer), '\n');
+
+	if( is.peek() == ' ' ) is.get();
+
+	string = buffer;
+
+	return is;
 }
