@@ -209,6 +209,38 @@ int main()
     }
 
     // FIND TEST END //////////////////////////////////////////////////////
+
+
+
+    // REPLACE TEST START /////////////////////////////////////////////////
+
+    {
+        String replace1 = "Hi, {name}";
+        PrintStringInfo(replace1);
+
+        String replace2 = "Hello, {name}";
+        PrintStringInfo(replace2);
+
+        String replace3 = "Hello {name}, how are you?";
+        PrintStringInfo(replace3);
+
+        String name1 = "Mark";
+        PrintStringInfo(name1);
+
+        String name2 = "Catherine";
+        PrintStringInfo(name2);
+
+        replace1.Replace(replace1.Find("{name}"), 6, name1.CStr());
+        PrintStringInfo(replace1);
+
+        replace2.Replace(replace2.Find("{name}"), 6, name2.CStr());
+        PrintStringInfo(replace2);
+
+        replace3.Replace(replace3.Find("{name}"), 6, name2.CStr());
+        PrintStringInfo(replace3);
+    }
+
+    // REPLACE TEST END ///////////////////////////////////////////////////
 }
 
 void PrintStringInfo(const String& string)

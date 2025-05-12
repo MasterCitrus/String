@@ -41,6 +41,9 @@ public:
 
 	String& Erase(size_t index = 0, size_t count = npos);
 
+	String& Replace(size_t pos, size_t count, const char* string);
+	String& Replace(size_t pos, size_t count, const String& string);
+
 	//Search
 	size_t Find( const String& string, size_t pos = 0 ) const;
 	size_t Find( const char* string, size_t pos = 0 ) const;
@@ -69,6 +72,8 @@ public:
 	const_iterator cend() const { return end(); }
 
 private:
+	void Allocate(size_t newSize, size_t oldCap);
+
 	void Debug() const;
 
 public:
