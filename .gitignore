@@ -1,6 +1,12 @@
+## VS Files
 /.vs
 x64/
 *.sln
 *.vcxproj
 *.filters
 *.user
+
+## CMake Generated Files
+CMakeFiles/
+*.cmake
+CMakeCache.txt
