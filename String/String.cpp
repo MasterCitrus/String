@@ -252,6 +252,16 @@ String String::operator+(const String& string)
 	return result;
 }
 
+char& String::operator[](size_t pos)
+{
+	return *( isSSO ? stack.buffer + pos : heap.ptr + pos );
+}
+
+const char& String::operator[](size_t pos) const
+{
+	return *( isSSO ? stack.buffer + pos : heap.ptr + pos );
+}
+
 void String::Clear()
 {
 	if (isSSO)
@@ -964,6 +974,26 @@ const char* String::Data() const
 char* String::Data()
 {
 	return isSSO ? stack.buffer : heap.ptr;
+}
+
+char& String::At(size_t pos)
+{
+	if( pos >= Size() )
+	{
+		throw std::out_of_range("This index is out of range.");
+	}
+
+	return *( isSSO ? stack.buffer + pos : heap.ptr + pos );
+}
+
+const char& String::At(size_t pos) const
+{
+	if( pos >= Size() )
+	{
+		throw std::out_of_range("This index is out of range.");
+	}
+
+	return *( isSSO ? stack.buffer + pos : heap.ptr + pos );
 }
 
 void String::Allocate(size_t newSize, size_t oldCap)

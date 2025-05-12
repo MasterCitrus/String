@@ -25,6 +25,9 @@ public:
 	String operator+(const char* string);
 	String operator+(const String& string);
 
+	char& operator[](size_t pos);
+	const char& operator[](size_t pos) const;
+
 	// Non Member Operator Overloads
 
 	friend String operator+( const String& lhs, const char* rhs );
@@ -40,6 +43,9 @@ public:
 	const char* Data() const;
 
 	char* Data();
+
+	char& At(size_t pos);
+	const char& At(size_t pos) const;
 
 	// Modifiers
 
